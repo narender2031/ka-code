@@ -1,0 +1,165 @@
+<div class="row">
+<style>
+._4z_b{
+    height: 37px !important;
+    width: 100px !important;
+    padding-left: 20px !important;
+}
+.uiGrid ._51mz{
+  height:37px !important;
+}
+</style>
+<meta name="google-signin-client_id" content="367164179713-o2vp44qfh28frcoe8mla19tm5lo7p9iq.apps.googleusercontent.com">
+<script src="https://apis.google.com/js/platform.js" async defer></script>
+    <div class="col-md-12 col-sm-12 col-xs-12" style="text-align: center; margin-top: 85px;"><h2>Welcome to Demo app</h2></div>
+    <div class="col-md-4 col-sm-4 col-xs-4">
+    </div>
+    <div class="col-md-4 col-sm-4 col-xs-4" style="margin-top: 160px;border: 1px solid #4444;padding: 50px;border-radius: 11px;">
+      <div class="col-md-6 col-sm-6 col-xs-6">
+        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+      </div>  
+      <a class="hidden" href="#" onclick="signOut();">Sign out</a>
+      <script>
+          function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
+          }
+      </script>
+      <div class="col-md-6 col-sm-6 col-xs-6" style="text-align: center;">
+        <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+        </fb:login-button>
+        <div id="status"></div> 
+      </div>  
+    </div>
+    <div class="col-md-4 col-sm-4 col-xs-4">
+    </div>
+</div>
+
+<script>
+ $(function(){ // jQuery dom ready event
+    if (window.location.href.toLowerCase().indexOf("loaded") < 0) {
+        window.location = window.location.href + '?loaded=1'
+    }
+});
+function onSignIn(googleUser) {
+  var profile = googleUser.getBasicProfile();
+  console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+  console.log('Name: ' + profile.getName());
+  console.log('Image URL: ' + profile.getImageUrl());
+  console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+  var data = {
+      name: profile.getName(),
+      google_token: profile.getId(),
+      email: profile.getEmail()
+  }
+  var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "http://localhost:3000/auth",
+  "method": "POST",
+  "headers": {
+    "content-type": "application/json",
+    'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+  },
+  "processData": false,
+  "data": JSON.stringify(data)
+}
+
+$.ajax(settings).done(function (response) {
+  window.location.replace("http://localhost:3000")
+});
+}
+</script>
+
+<script>
+
+ function statusChangeCallback(response) {
+    console.log('statusChangeCallback');
+    console.log(response["authResponse"]["userID"]);
+    console.log(response)
+    console.log("Hello")
+    // The response object is returned with a status field that lets the
+    // app know the current login status of the person.
+    // Full docs on the response object can be found in the documentation
+    // for FB.getLoginStatus().
+    
+    if (response.status === 'connected') {
+      // Logged into your app and Facebook.
+      testAPI();
+    } else {
+      // The person is not logged into your app or we are unable to tell.
+      document.getElementById('status').innerHTML = 'Please log ' +
+        'into this app.';
+    }
+  }
+
+  function checkLoginState() {
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+        FB.logout(function(response) {
+   // Person is now logged out
+    });
+  }
+
+
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '409176242889594',
+      cookie     : true,
+      xfbml      : true,
+      version    : 'v3.0'
+    });
+      
+    FB.AppEvents.logPageView(); 
+      
+      
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+    function testAPI() {
+            console.log('Welcome!  Fetching your information.... ');
+            FB.api('/me', function(response) {
+                console.log(response)
+        var data = {
+        name: response.name,
+        facebook_token: response.id
+        }
+        var settings = {
+        "async": true,
+        "crossDomain": true,
+        "url": "http://localhost:3000/fb_login",
+        "method": "POST",
+        "headers": {
+            "content-type": "application/json",
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        },
+        "processData": false,
+        "data": JSON.stringify(data)
+        }
+
+        $.ajax(settings).done(function (response) {
+        window.location.replace("http://localhost:3000")
+        });
+
+       
+        
+        });
+    }
+
+
+
+
+</script>
+
+
+
